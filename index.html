@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzaria Mega - Cardápio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Pizzaria Mega - Cardápio</h1>
+    </header>
+    <section id="menu">
+        <h2>Pizzas</h2>
+        <ul>
+            <li>Pizza 8 fatias</li>
+            <li>Pizza Broto (4 fatias)</li>
+        </ul>
+        <h2>Esfihas</h2>
+        <ul>
+            <li>Esfiha de Carne</li>
+            <li>Esfiha de Frango</li>
+        </ul>
+        <h2>Refrigerantes</h2>
+        <ul>
+            <li>Refrigerante 600ml</li>
+            <li>Refrigerante 1L</li>
+        </ul>
+        <h2>Bebidas</h2>
+        <ul>
+            <li>Suco de Laranja</li>
+            <li>Água Mineral</li>
+        </ul>
+    </section>
+    <footer>
+        <p>Pedidos via WhatsApp: <a href="https://wa.me/5511998803722">+55 11 99880-3722</a></p>
+        <p id="taxa-entrega"></p>
+    </footer>
+
+    <script>
+        function calcularTaxaDeEntrega(origem, destino) {
+            var distancia = 0;
+
+            // Chama a API do Google Maps para calcular a distância
+            var service = new google.maps.DistanceMatrixService();
+            service.getDistanceMatrix(
+                {
+                    origins: [origem], 
+                    destinations: [destino],
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, 
+                function(response, status) {
+                    if (status === google.maps.DistanceMatrixStatus.OK) {
+                        var resultado = response.rows[0].elements[0];
+                        if (resultado.status === "OK") {
+                            // Calcula a taxa de entrega com base na distância
+                            distancia = resultado.distance.value / 1000; // distância em quilômetros
+
+                            // Define a taxa de entrega (exemplo simples)
+                            var taxa;
+                            if (distancia <= 5) {
+                                taxa = 10; // R$ 10 para até 5 km
+                            } else if (distancia <= 10) {
+                                taxa = 15; // R$ 15 para até 10 km
+                            } else {
+                                taxa = 20; // R$ 20 para mais de 10 km
+                            }
+
+                            // Exibe a taxa de entrega
+                            document.getElementById("taxa-entrega").innerHTML = "Taxa de entrega: R$ " + taxa;
+                        } else {
+                            alert("Não foi possível calcular a distância.");
+                        }
+                    } else {
+                        alert("Erro no cálculo da distância: " + status);
+                    }
+                });
+        }
+
+        // Exemplo de chamada para calcular a taxa de entrega
+        calcularTaxaDeEntrega("Rua da Pizzaria, Cidade, Estado", "Endereço do Cliente, Cidade, Estado");
+    </script>
+
+    <!-- Inclua a API do Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_DE_API&callback=initMap" async defer></script>
+</body>
+</html>
