@@ -18,21 +18,36 @@
         img {
             width: 150px;
         }
-        .produto, #carrinho {
-            background-color: #222;
+        .categoria, .subcategoria {
+            background-color: #333;
             border-radius: 10px;
             padding: 15px;
             margin: 10px auto;
             width: 80%;
             color: yellow;
         }
-        button {
+        .produto {
+            background-color: #222;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 5px auto;
+            width: 90%;
+            color: yellow;
+        }
+        button, .selecionavel {
             background-color: yellow;
             color: black;
             border: none;
             padding: 10px;
             cursor: pointer;
             font-weight: bold;
+            margin: 5px;
+        }
+        .selecionado {
+            background-color: orange;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -44,17 +59,25 @@
     
     <section id="menu">
         <h2>Cardápio</h2>
-        <div class="produto" data-nome="Pizza 8 Fatias" data-preco="50">
-            <p>Pizza 8 Fatias - R$50,00</p>
-            <button onclick="adicionarAoCarrinho(this)">Adicionar</button>
-        </div>
-        <div class="produto" data-nome="Pizza Broto" data-preco="30">
-            <p>Pizza Broto - R$30,00</p>
-            <button onclick="adicionarAoCarrinho(this)">Adicionar</button>
-        </div>
-        <div class="produto" data-nome="Esfiha de Carne" data-preco="8">
-            <p>Esfiha de Carne - R$8,00</p>
-            <button onclick="adicionarAoCarrinho(this)">Adicionar</button>
+        
+        <div class="categoria">
+            <h3>Pizzas</h3>
+            <div class="subcategoria">
+                <h4>Tamanho</h4>
+                <button class="selecionavel" onclick="selecionarTamanho(this, 8)">8 Fatias</button>
+                <button class="selecionavel" onclick="selecionarTamanho(this, 4)">4 Fatias</button>
+            </div>
+            <div class="subcategoria">
+                <h4>Sabores</h4>
+                <button class="selecionavel" onclick="selecionarSabores(1)">1 Sabor</button>
+                <button class="selecionavel" onclick="selecionarSabores(2)">2 Sabores</button>
+                <button class="selecionavel" onclick="selecionarSabores(3)">3 Sabores</button>
+            </div>
+            <div class="subcategoria">
+                <h4>Escolha o sabor</h4>
+                <button class="selecionavel" onclick="selecionarSabor(this, 'Pizza Atum', 45)">Atum - R$45,00</button>
+                <button class="selecionavel" onclick="selecionarSabor(this, 'Pizza Teste 2', 43)">Teste 2 - R$43,00</button>
+            </div>
         </div>
     </section>
     
@@ -62,38 +85,68 @@
         <h2>Carrinho</h2>
         <ul id="itens-carrinho"></ul>
         <p>Total: R$ <span id="total">0</span></p>
+        <h3>Escolha a opção de entrega</h3>
+        <button onclick="selecionarEntrega('retirada')">Retirada no Balcão</button>
+        <button onclick="selecionarEntrega('delivery')">Delivery</button>
+        
+        <div id="dados-retirada" class="hidden">
+            <p>Nome: <input type="text" id="nome-retirada" required></p>
+            <p>Forma de pagamento: <input type="text" id="pagamento-retirada" required></p>
+        </div>
+        
+        <div id="dados-delivery" class="hidden">
+            <p>Nome: <input type="text" id="nome-delivery" required></p>
+            <p>Endereço: <input type="text" id="endereco" required></p>
+            <p>Telefone: <input type="text" id="telefone" required></p>
+            <p>Forma de pagamento: <input type="text" id="pagamento-delivery" required></p>
+        </div>
+        
         <button onclick="finalizarPedido()">Finalizar Pedido</button>
     </section>
     
     <script>
         let carrinho = [];
-        function adicionarAoCarrinho(botao) {
-            let produto = botao.parentElement;
-            let nome = produto.getAttribute("data-nome");
-            let preco = parseFloat(produto.getAttribute("data-preco"));
-            carrinho.push({ nome, preco });
-            atualizarCarrinho();
+        let saboresSelecionados = [];
+
+        function selecionarEntrega(opcao) {
+            document.getElementById("dados-retirada").classList.add("hidden");
+            document.getElementById("dados-delivery").classList.add("hidden");
+            
+            if (opcao === 'retirada') {
+                document.getElementById("dados-retirada").classList.remove("hidden");
+            } else if (opcao === 'delivery') {
+                document.getElementById("dados-delivery").classList.remove("hidden");
+            }
         }
-        
-        function atualizarCarrinho() {
-            let lista = document.getElementById("itens-carrinho");
-            let total = 0;
-            lista.innerHTML = "";
-            carrinho.forEach(item => {
-                let li = document.createElement("li");
-                li.textContent = `${item.nome} - R$${item.preco.toFixed(2)}`;
-                lista.appendChild(li);
-                total += item.preco;
-            });
-            document.getElementById("total").textContent = total.toFixed(2);
-        }
-        
+
         function finalizarPedido() {
             let mensagem = "Pedido:%0A";
             carrinho.forEach(item => {
                 mensagem += `- ${item.nome}: R$${item.preco.toFixed(2)}%0A`;
             });
-            mensagem += `Total: R$${document.getElementById("total").textContent}`;
+            mensagem += `Total: R$${document.getElementById("total").textContent}%0A`;
+            
+            let nome, endereco, telefone, pagamento;
+            if (!document.getElementById("dados-retirada").classList.contains("hidden")) {
+                nome = document.getElementById("nome-retirada").value;
+                pagamento = document.getElementById("pagamento-retirada").value;
+                if (!nome || !pagamento) {
+                    alert("Por favor, preencha todos os campos obrigatórios.");
+                    return;
+                }
+                mensagem += `Nome: ${nome}%0AForma de pagamento: ${pagamento}`;
+            } else if (!document.getElementById("dados-delivery").classList.contains("hidden")) {
+                nome = document.getElementById("nome-delivery").value;
+                endereco = document.getElementById("endereco").value;
+                telefone = document.getElementById("telefone").value;
+                pagamento = document.getElementById("pagamento-delivery").value;
+                if (!nome || !endereco || !telefone || !pagamento) {
+                    alert("Por favor, preencha todos os campos obrigatórios.");
+                    return;
+                }
+                mensagem += `Nome: ${nome}%0AEndereço: ${endereco}%0ATelefone: ${telefone}%0AForma de pagamento: ${pagamento}`;
+            }
+            
             window.location.href = `https://wa.me/5511998381976?text=${mensagem}`;
         }
     </script>
